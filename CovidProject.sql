@@ -17,7 +17,6 @@ FROM PortfolioProject..CovidDeaths
 WHERE continent is not null
 order by 1,2
 
-
 -- Looking at the Total Cases vs Total Deaths
 -- Shows the likelihood of dying if you contract COVID-19 in your country
 
@@ -52,7 +51,6 @@ WHERE continent is not null
 GROUP BY Location
 order by TotalDeathCount DESC
 
-
 -- Analyzing data by continents 
 
 -- Showing continents with the highest death count per population
@@ -64,8 +62,6 @@ WHERE continent is not null
 GROUP BY continent
 order by TotalDeathCount DESC
 
-
-
 -- Showing the global numbers
 
 SELECT SUM(new_cases) AS Total_Cases, SUM(cast(new_deaths as bigint)) AS Total_Deaths, SUM(cast(new_deaths as bigint))/SUM(new_cases)*100 AS DeathPercentage
@@ -74,7 +70,6 @@ FROM PortfolioProject..CovidDeaths
 WHERE continent is not null
 --GROUP BY date
 order by 1,2
-
 
 -- Looking at Total Population vs Vaccinations
 -- Showing percentage of population that has received at least one COVID Vaccine
@@ -91,10 +86,10 @@ WHERE dea.continent is not null
 
 	-- Using CTE to perform calculation on Partition By in previous entry
 
-	With PopvsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated)
-	as 
-	(
-	SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+With PopvsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated)
+AS 
+(
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
 , SUM(Cast(vac.new_vaccinations as bigint)) OVER (Partition by dea.location ORDER BY dea.location, dea.date) AS RollingPeopleVaccinated
 --, (RollingPeopleVaccinated/population)*100
 FROM PortfolioProject..CovidDeaths dea
@@ -102,26 +97,23 @@ JOIN PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
 	and dea.date = vac.date
 WHERE dea.continent is not null
-	--ORDER BY 2,3
-	)
-	SELECT *, (RollingPeopleVaccinated/Population)*100
-	FROM PopvsVac
+--ORDER BY 2,3
+)
+SELECT *, (RollingPeopleVaccinated/Population)*100
+FROM PopvsVac
 
 
-	-- Using Temp Table to perform calculation on Partition By in previous entry
-	DROP TABLE if exists #PercentPopulationVaccinated
-	Create Table #PercentPopulationVaccinated
-	(
-	Continent nvarchar(255),
-	Location nvarchar(255),
-	Date datetime,
-	Population numeric,
-	New_vaccinations numeric,
-	RollingPeopleVaccinated numeric
-	)
-
-
-
+-- Using Temp Table to perform calculation on Partition By in previous entry
+DROP TABLE if exists #PercentPopulationVaccinated
+Create Table #PercentPopulationVaccinated
+(
+Continent nvarchar(255),
+Location nvarchar(255),
+Date datetime,
+Population numeric,
+New_vaccinations numeric,
+RollingPeopleVaccinated numeric
+)
 
 	Insert into #PercentPopulationVaccinated
 	SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
@@ -139,10 +131,6 @@ JOIN PortfolioProject..CovidVaccinations vac
 
 
 
-
-
-
-
 -- Creating a View to store data for later visualizations
 
 Create View PercentPopulationVaccinated AS 
@@ -154,8 +142,3 @@ JOIN PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
 	and dea.date = vac.date
 WHERE dea.continent is not null
---ORDER BY 2,3
-
-
-SELECT *
-FROM PercentPopulationVaccinated
