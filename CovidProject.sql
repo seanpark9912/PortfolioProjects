@@ -82,9 +82,9 @@ JOIN PortfolioProject..CovidVaccinations vac
 	On dea.location = vac.location
 	and dea.date = vac.date
 WHERE dea.continent is not null
-	ORDER BY 2,3
+ORDER BY 2,3
 
-	-- Using CTE to perform calculation on Partition By in previous entry
+-- Using CTE to perform calculation on Partition By in previous entry
 
 With PopvsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated)
 AS 
@@ -115,8 +115,8 @@ New_vaccinations numeric,
 RollingPeopleVaccinated numeric
 )
 
-	Insert into #PercentPopulationVaccinated
-	SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+Insert into #PercentPopulationVaccinated
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
 , SUM(Cast(vac.new_vaccinations as bigint)) OVER (Partition by dea.location ORDER BY dea.location, dea.date) AS RollingPeopleVaccinated
 --, (RollingPeopleVaccinated/population)*100
 FROM PortfolioProject..CovidDeaths dea
